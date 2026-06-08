@@ -1,13 +1,14 @@
-"use client";
+'use client';
+import Link from "next/link";
 import React, { useEffect } from "react";
 
 export default function Navbar() {
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary">
       <div className="container-fluid">
-        <a className="navbar-brand">
+        <Link href="/" className="navbar-brand">
           Navbar
-        </a>
+        </Link>
         <button
           className="navbar-toggler"
           type="button"
@@ -21,18 +22,18 @@ export default function Navbar() {
         </button>
         <div className="collapse navbar-collapse" id="navbarNavAltMarkup">
           <div className="navbar-nav">
-            <a className="nav-link active" aria-current="page">
+            <Link href="/" className="nav-link active" aria-current="page">
               Home
-            </a>
-            <a className="nav-link">
-              Features
-            </a>
-            <a className="nav-link">
-              Pricing
-            </a>
-            <a className="nav-link disabled" aria-disabled="true">
-              Disabled
-            </a>
+            </Link>
+            <Link href="/productos" className="nav-link">
+              Productos
+            </Link>
+            <Link href="/presupuesto" className="nav-link">
+              Presupuesto
+            </Link>
+            <Link href="/usuarios" className="nav-link">
+              Usuarios
+            </Link>
           </div>
         </div>
       </div>
