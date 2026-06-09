@@ -1,4 +1,4 @@
-import Navbar from "./shared/components/navbar/ui/Navbar/Navbar";
+import Navbar from "./shared/components/navbar/Navbar";
 
 export default function Home() {
   return <Navbar />;
