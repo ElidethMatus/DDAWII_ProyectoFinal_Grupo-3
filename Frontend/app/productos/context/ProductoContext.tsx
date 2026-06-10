@@ -4,6 +4,11 @@ import { Producto } from "../models/Producto";
 export type ProductoContextType = {
   productos: Producto[];
   carrito: Producto[];
+  productoSeleccionado: Producto | null;
+  setProductoSeleccionado: (producto: Producto | null) => void;
+  showModal: boolean;
+  abrirModal: () => void;
+  cerrarModal: () => void;
   agregarProducto: (producto: Omit<Producto, "id">) => void;
   eliminarProducto: (id: number) => void;
   actualizarProducto: (
@@ -18,6 +23,11 @@ export type ProductoContextType = {
 export const ProductoContext = React.createContext<ProductoContextType>({
   productos: [],
   carrito: [],
+  productoSeleccionado: null,
+  setProductoSeleccionado: () => {},
+  showModal: false,
+  abrirModal: () => {},
+  cerrarModal: () => {},
   agregarProducto: () => {},
   eliminarProducto: () => {},
   actualizarProducto: () => {},

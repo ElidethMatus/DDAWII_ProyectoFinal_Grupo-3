@@ -4,7 +4,7 @@ import React, { useEffect } from "react";
 
 export default function Navbar() {
   return (
-    <nav className="navbar navbar-expand-lg bg-body-tertiary">
+    <nav className="navbar navbar-expand-lg bg-body-tertiary fixed-top">
       <div className="container-fluid">
         <Link href="/" className="navbar-brand">
           Navbar
