@@ -17,6 +17,7 @@ export const ProductoProvider: React.FC<{ children: React.ReactNode }> = ({
   const [productoSeleccionado, setProductoSeleccionado] =
     useState<Producto | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [showCarritoModal, setShowCarritoModal] = useState(false);
 
   useEffect(() => {
     getProductos().then(setProductos);
@@ -27,6 +28,8 @@ export const ProductoProvider: React.FC<{ children: React.ReactNode }> = ({
     setShowModal(false);
     setProductoSeleccionado(null);
   };
+  const abrirCarritoModal = () => setShowCarritoModal(true);
+  const cerrarCarritoModal = () => setShowCarritoModal(false);
 
   const agregarProducto = async (producto: Omit<Producto, "id">) => {
     const nuevo = await crearProducto(producto);
@@ -77,6 +80,9 @@ export const ProductoProvider: React.FC<{ children: React.ReactNode }> = ({
         showModal,
         abrirModal,
         cerrarModal,
+        showCarritoModal,
+        abrirCarritoModal,
+        cerrarCarritoModal,
       }}
     >
       {children}

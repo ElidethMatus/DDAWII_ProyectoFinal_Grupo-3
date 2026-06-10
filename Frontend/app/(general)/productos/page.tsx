@@ -1,4 +1,5 @@
 "use client";
+import CarritoModal from "@/app/productos/components/CarritoModal";
 import ProductosLista from "@/app/productos/components/ProductosLista";
 import ProductosModal from "@/app/productos/components/ProductosModal";
 import { ProductoContext } from "@/app/productos/context/ProductoContext";
@@ -14,6 +15,7 @@ function ProductosContent() {
       <button className="btn btn-primary" onClick={abrirModal}>
         Crear Producto
       </button>
+      <CarritoModal />
       <ProductosModal />
       <ProductosLista />
     </main>
@@ -21,9 +23,5 @@ function ProductosContent() {
 }
 
 export default function Page() {
-  return (
-    <ProductoProvider>
-      <ProductosContent />
-    </ProductoProvider>
-  );
+  return <ProductosContent />;
 }

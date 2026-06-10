@@ -1,4 +1,5 @@
 import Navbar from "../shared/components/navbar/Navbar";
+import { ProductoProvider } from "@/app/productos/providers/ProductoProvider";
 
 export default function GeneralLayout({
   children,
@@ -8,8 +9,10 @@ export default function GeneralLayout({
   return (
     <html lang="es">
       <body>
-        <Navbar />
-        <main>{children}</main>
+        <ProductoProvider>
+          <Navbar />
+          <main>{children}</main>
+        </ProductoProvider>
       </body>
     </html>
   );

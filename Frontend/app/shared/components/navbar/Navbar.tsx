@@ -1,8 +1,11 @@
-'use client';
+"use client";
+import { ProductoContext } from "@/app/productos/context/ProductoContext";
 import Link from "next/link";
-import React, { useEffect } from "react";
+import React, { useContext, useEffect } from "react";
 
 export default function Navbar() {
+  const { carrito, abrirCarritoModal } = useContext(ProductoContext);
+
   return (
     <nav className="navbar navbar-expand-lg bg-body-tertiary fixed-top">
       <div className="container-fluid">
@@ -34,6 +37,14 @@ export default function Navbar() {
             <Link href="/usuarios" className="nav-link">
               Usuarios
             </Link>
+          </div>
+          <div className="ms-auto">
+            <button className="btn btn-outline-primary position-relative" onClick={abrirCarritoModal}>
+              <i className="bi bi-cart4"></i>
+              <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                {carrito.length}
+              </span>
+            </button>
           </div>
         </div>
       </div>

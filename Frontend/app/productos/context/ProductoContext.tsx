@@ -9,6 +9,9 @@ export type ProductoContextType = {
   showModal: boolean;
   abrirModal: () => void;
   cerrarModal: () => void;
+  showCarritoModal: boolean;
+  abrirCarritoModal: () => void;
+  cerrarCarritoModal: () => void;
   agregarProducto: (producto: Omit<Producto, "id">) => void;
   eliminarProducto: (id: number) => void;
   actualizarProducto: (
@@ -28,6 +31,9 @@ export const ProductoContext = React.createContext<ProductoContextType>({
   showModal: false,
   abrirModal: () => {},
   cerrarModal: () => {},
+  showCarritoModal: false,
+  abrirCarritoModal: () => {},
+  cerrarCarritoModal: () => {},
   agregarProducto: () => {},
   eliminarProducto: () => {},
   actualizarProducto: () => {},
