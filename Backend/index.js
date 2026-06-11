@@ -32,13 +32,27 @@ app.get('/products', async (req, res) => {
 
 });
 
+app.get('/users', async (req, res) => {
+
+    try {
+        const usuarios = await Usuario.findAll({
+            attributes: ['id', 'nombre', 'correo', 'rol']
+        });
+        res.status(200).json(usuarios);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
 app.post('/users', async (req, res) => {
 
     try {
         const usuario = await Usuario.create({
-            nombre: req.body.nombre,
-            correo: req.body.correo,
-            password: req.body.password,
+            nombre: req.body.nombre?.trim(),
+            correo: req.body.correo?.trim().toLowerCase(),
+            password: req.body.password?.trim(),
             rol: req.body.rol || 'cliente'
         });
         res.status(201).json(usuario);
@@ -53,10 +67,13 @@ app.post('/users', async (req, res) => {
 app.post('/login', async (req, res) => {
 
     try {
+        const correo = req.body.correo?.trim().toLowerCase();
+        const password = req.body.password?.trim();
+
         const usuario = await Usuario.findOne({
             where: {
-                correo: req.body.correo,
-                password: req.body.password
+                correo,
+                password
             }
         });
 
