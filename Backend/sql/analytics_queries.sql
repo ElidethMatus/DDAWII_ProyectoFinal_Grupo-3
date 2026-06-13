@@ -1,6 +1,6 @@
--- ===============================================
+
 -- QUERIES SQL PARA GRÁFICAS DE ANALYTICS
--- ===============================================
+
 
 -- 1. PRODUCTOS MÁS VENDIDOS (Top 10)
 SELECT 
@@ -49,9 +49,9 @@ ORDER BY mes DESC
 LIMIT 12;
 
 
--- ===============================================
--- QUERIES ADICIONALES ÚTILES
--- ===============================================
+-
+-- QUERIES ADICIONALES ÚTILES POR SI FALLAN LAS ANTERIORES
+
 
 -- Producto más vendido
 SELECT 
