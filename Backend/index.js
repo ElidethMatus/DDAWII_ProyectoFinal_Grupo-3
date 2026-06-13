@@ -4,6 +4,15 @@ const cors = require('cors');
 const sequelize = require('./connection/db');
 const Producto = require('./models/producto');
 const Usuario = require('./models/usuario');
+const Order = require('./models/order');
+const OrderDetail = require('./models/orderDetail');
+
+// Setup associations
+Producto.hasMany(OrderDetail, { foreignKey: 'product_id' });
+OrderDetail.belongsTo(Producto, { foreignKey: 'product_id' });
+
+Order.hasMany(OrderDetail, { foreignKey: 'order_id' });
+OrderDetail.belongsTo(Order, { foreignKey: 'order_id' });
 
 const app = express();
 
@@ -32,13 +41,27 @@ app.get('/products', async (req, res) => {
 
 });
 
+app.get('/users', async (req, res) => {
+
+    try {
+        const usuarios = await Usuario.findAll({
+            attributes: ['id', 'nombre', 'correo', 'rol']
+        });
+        res.status(200).json(usuarios);
+    } catch (error) {
+        res.status(500).json({
+            message: error.message
+        });
+    }
+});
+
 app.post('/users', async (req, res) => {
 
     try {
         const usuario = await Usuario.create({
-            nombre: req.body.nombre,
-            correo: req.body.correo,
-            password: req.body.password,
+            nombre: req.body.nombre?.trim(),
+            correo: req.body.correo?.trim().toLowerCase(),
+            password: req.body.password?.trim(),
             rol: req.body.rol || 'cliente'
         });
         res.status(201).json(usuario);
@@ -53,10 +76,13 @@ app.post('/users', async (req, res) => {
 app.post('/login', async (req, res) => {
 
     try {
+        const correo = req.body.correo?.trim().toLowerCase();
+        const password = req.body.password?.trim();
+
         const usuario = await Usuario.findOne({
             where: {
-                correo: req.body.correo,
-                password: req.body.password
+                correo,
+                password
             }
         });
 
@@ -129,6 +155,226 @@ app.put('/products/:id', async (req, res) => {
 
     }
 
+});
+
+// Endpoint temporal para verificar estructura de tablas
+app.get('/debug/tables', async (req, res) => {
+    try {
+        const [orderDetails] = await sequelize.query("DESCRIBE order_details");
+        const [orders] = await sequelize.query("DESCRIBE orders");
+        const [products] = await sequelize.query("DESCRIBE products");
+        
+        res.status(200).json({
+            order_details: orderDetails,
+            orders: orders,
+            products: products
+        });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Endpoint para insertar datos de prueba
+app.get('/debug/seed-data', async (req, res) => {
+    try {
+        // Primero verificar qué productos existen
+        const [products] = await sequelize.query("SELECT id FROM products LIMIT 10");
+        
+        if (products.length === 0) {
+            return res.status(400).json({ error: 'No hay productos en la base de datos' });
+        }
+
+        // Usar los IDs de productos existentes
+        const productIds = products.map(p => p.id);
+        
+        // Insertar orders de prueba
+        await sequelize.query(`
+            INSERT INTO orders (user_id, fecha, total) VALUES
+            (1, '2024-01-15 10:30:00', 150.00),
+            (1, '2024-02-20 14:45:00', 200.50),
+            (1, '2024-03-10 09:15:00', 180.00),
+            (2, '2024-01-25 16:20:00', 120.00),
+            (2, '2024-02-15 11:00:00', 250.00),
+            (1, '2024-04-05 13:30:00', 300.00),
+            (3, '2024-03-20 15:45:00', 175.50),
+            (1, '2024-05-12 10:00:00', 220.00),
+            (2, '2024-04-18 14:15:00', 190.00),
+            (1, '2024-06-01 09:30:00', 280.00)
+        `);
+
+        // Insertar order_details de prueba usando IDs de productos reales
+        const p1 = productIds[0] || 1;
+        const p2 = productIds[1] || productIds[0] || 2;
+        const p3 = productIds[2] || productIds[0] || 3;
+        const p4 = productIds[3] || productIds[0] || 4;
+
+        await sequelize.query(`
+            INSERT INTO order_details (order_id, product_id, cantidad, precio) VALUES
+            (1, ${p1}, 2, 50.00),
+            (1, ${p2}, 1, 50.00),
+            (2, ${p1}, 3, 50.00),
+            (2, ${p3}, 1, 50.50),
+            (3, ${p2}, 2, 45.00),
+            (3, ${p4}, 2, 45.00),
+            (4, ${p1}, 1, 50.00),
+            (4, ${p3}, 2, 35.00),
+            (5, ${p2}, 3, 45.00),
+            (5, ${p4}, 2, 57.50),
+            (6, ${p1}, 4, 50.00),
+            (6, ${p2}, 2, 50.00),
+            (7, ${p3}, 3, 35.00),
+            (7, ${p4}, 2, 35.25),
+            (8, ${p1}, 2, 50.00),
+            (8, ${p3}, 2, 60.00),
+            (9, ${p2}, 2, 45.00),
+            (9, ${p4}, 2, 50.00),
+            (10, ${p1}, 3, 50.00),
+            (10, ${p2}, 2, 65.00)
+        `);
+
+        res.status(200).json({ message: 'Datos de prueba insertados correctamente', productIds });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// ===== ENDPOINTS PARA GRÁFICAS =====
+
+// 1. Productos más vendidos (Top 10)
+app.get('/metrics/top-products', async (req, res) => {
+    try {
+        const result = await sequelize.query(`
+            SELECT 
+                p.nombre,
+                SUM(od.cantidad) AS total_vendido,
+                COUNT(od.id) AS num_ordenes
+            FROM products p
+            INNER JOIN order_details od ON od.product_id = p.id
+            GROUP BY p.id, p.nombre
+            ORDER BY total_vendido DESC
+            LIMIT 10
+        `, { type: sequelize.QueryTypes.SELECT });
+
+        if (result.length > 0) {
+            res.status(200).json({
+                message: 'Top 10 productos más vendidos',
+                data: result
+            });
+        } else {
+            res.status(400).json({
+                message: 'No se encontraron datos',
+                data: []
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error al obtener productos más vendidos',
+            error: error.message
+        });
+    }
+});
+
+// 2. Ventas por categoría
+app.get('/metrics/sales-by-category', async (req, res) => {
+    try {
+        const result = await sequelize.query(`
+            SELECT 
+                p.categoria,
+                SUM(od.cantidad) AS total_vendido,
+                COUNT(DISTINCT od.order_id) AS num_ordenes,
+                SUM(od.cantidad * od.precio) AS ingresos
+            FROM products p
+            INNER JOIN order_details od ON od.product_id = p.id
+            GROUP BY p.categoria
+            ORDER BY ingresos DESC
+        `, { type: sequelize.QueryTypes.SELECT });
+
+        if (result.length > 0) {
+            res.status(200).json({
+                message: 'Ventas por categoría',
+                data: result
+            });
+        } else {
+            res.status(400).json({
+                message: 'No se encontraron datos',
+                data: []
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error al obtener ventas por categoría',
+            error: error.message
+        });
+    }
+});
+
+// 3. Ingresos por mes
+app.get('/metrics/revenue-by-month', async (req, res) => {
+    try {
+        const result = await Order.findAll({
+            attributes: [
+                [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m'), 'mes'],
+                [sequelize.fn('SUM', sequelize.col('total')), 'ingresos'],
+                [sequelize.fn('COUNT', sequelize.col('id')), 'num_ordenes']
+            ],
+            group: [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m')],
+            order: [[sequelize.literal('mes'), 'DESC']],
+            limit: 12,
+            raw: true
+        });
+
+        if (result.length > 0) {
+            res.status(200).json({
+                message: 'Ingresos por mes',
+                data: result
+            });
+        } else {
+            res.status(400).json({
+                message: 'No se encontraron datos',
+                data: []
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error al obtener ingresos por mes',
+            error: error.message
+        });
+    }
+});
+
+// 4. Órdenes por mes
+app.get('/metrics/orders-by-month', async (req, res) => {
+    try {
+        const result = await Order.findAll({
+            attributes: [
+                [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m'), 'mes'],
+                [sequelize.fn('COUNT', sequelize.col('id')), 'total_ordenes'],
+                [sequelize.fn('SUM', sequelize.col('total')), 'ingresos_mes'],
+                [sequelize.fn('AVG', sequelize.col('total')), 'promedio_orden']
+            ],
+            group: [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m')],
+            order: [[sequelize.literal('mes'), 'DESC']],
+            limit: 12,
+            raw: true
+        });
+
+        if (result.length > 0) {
+            res.status(200).json({
+                message: 'Órdenes por mes',
+                data: result
+            });
+        } else {
+            res.status(400).json({
+                message: 'No se encontraron datos',
+                data: []
+            });
+        }
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error al obtener órdenes por mes',
+            error: error.message
+        });
+    }
 });
 
 app.listen(5000, () => {
