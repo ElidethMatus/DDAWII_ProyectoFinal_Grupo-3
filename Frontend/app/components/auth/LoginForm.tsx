@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginUser } from "../../servicios/api";
+import { loginUser } from "../../shared/servicios/api";
 import { useAuth } from "../../context/AuthContext";
 
 export default function LoginForm() {

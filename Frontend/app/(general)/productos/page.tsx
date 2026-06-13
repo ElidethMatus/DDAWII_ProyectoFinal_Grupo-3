@@ -4,11 +4,11 @@ import ProductosLista from "@/app/productos/components/ProductosLista";
 import ProductosModal from "@/app/productos/components/ProductosModal";
 import { ProductoContext } from "@/app/productos/context/ProductoContext";
 import { ProductoProvider } from "@/app/productos/providers/ProductoProvider";
+import ProtectedRoute from "@/app/context/ProtectedRoute";
 import { useContext } from "react";
 
 function ProductosContent() {
   const { abrirModal } = useContext(ProductoContext);
-
   return (
     <main style={{ padding: "2rem", marginTop: "4rem" }}>
       <h1>Módulo de Productos</h1>
@@ -23,5 +23,11 @@ function ProductosContent() {
 }
 
 export default function Page() {
-  return <ProductosContent />;
+  return (
+    <ProtectedRoute>
+      <ProductoProvider>
+        <ProductosContent />
+      </ProductoProvider>
+    </ProtectedRoute>
+  );
 }

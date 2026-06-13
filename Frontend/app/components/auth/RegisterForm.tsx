@@ -2,7 +2,7 @@
 
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { registerUser } from "../../servicios/api";
+import { registerUser } from "../../shared/servicios/api";
 
 export default function RegisterForm() {
 	const [nombre, setNombre] = useState("");
