@@ -91,8 +91,8 @@ app.get('/orders/detail/:orderId', async (req, res) => {
         res.status(500).json({
             message: error.message
         });
-
     }
+    });
 
 app.get('/users', async (req, res) => {
 

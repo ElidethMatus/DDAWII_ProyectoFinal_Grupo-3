@@ -1,13 +1,13 @@
 "use client";
-
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { registerUser } from "../../shared/servicios/api";
+import { registerUser } from "../../servicios/api";
 
 export default function RegisterForm() {
 	const [nombre, setNombre] = useState("");
 	const [correo, setCorreo] = useState("");
 	const [password, setPassword] = useState("");
+	const [rol, setRol] = useState("cliente");
 	const [error, setError] = useState("");
 	const [loading, setLoading] = useState(false);
 	const router = useRouter();
@@ -22,6 +22,7 @@ export default function RegisterForm() {
 				nombre: nombre.trim(),
 				correo: correo.trim().toLowerCase(),
 				password: password.trim(),
+				rol,
 			});
 			router.push("/iniciar-sesion");
 		} catch (err: any) {
@@ -75,6 +76,22 @@ export default function RegisterForm() {
 										required
 									/>
 								</div>
+
+<div className="mb-3">
+	<label htmlFor="rol" className="form-label">
+		Tipo de usuario
+	</label>
+
+	<select
+		id="rol"
+		className="form-select"
+		value={rol}
+		onChange={(e) => setRol(e.target.value)}
+	>
+		<option value="cliente">Cliente</option>
+		<option value="vendedor">Vendedor</option>
+	</select>
+</div>
 
 								{error && <div className="alert alert-danger">{error}</div>}
 

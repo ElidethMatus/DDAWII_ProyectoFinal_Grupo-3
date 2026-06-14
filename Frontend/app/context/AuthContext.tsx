@@ -1,14 +1,11 @@
 "use client";
-
 import { createContext, useContext, useEffect, useState } from "react";
-
 type User = {
   id: number;
   nombre: string;
   correo: string;
   rol: string;
 };
-
 type AuthContextValue = {
   user: User | null;
   login: (user: User) => void;

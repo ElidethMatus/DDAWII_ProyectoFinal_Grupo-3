@@ -3,7 +3,7 @@ const {Sequelize} = require('sequelize');
 const sequelize = new Sequelize(
     'ecommerce', 
     'root', 
-    'Admin1234', 
+    'temporal', 
     {
     host: 'localhost',
     port: 3306,

@@ -1,5 +1,4 @@
 "use client";
-
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./AuthContext";
@@ -10,7 +9,6 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    // esperamos a que AuthContext cargue el usuario de localStorage
     setCargando(false);
   }, []);
 
@@ -20,10 +18,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
     }
   }, [cargando, user, router]);
 
-  // mientras carga no hacemos nada
   if (cargando) return null;
-
   if (!user) return null;
-
   return <>{children}</>;
 }

@@ -1,9 +1,9 @@
 "use client";
-
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
-import { loginUser } from "../../shared/servicios/api";
+import { loginUser } from "../../servicios/api";
 import { useAuth } from "../../context/AuthContext";
+import Image from "next/image";
 
 export default function LoginForm() {
   const [correo, setCorreo] = useState("");
@@ -24,7 +24,7 @@ export default function LoginForm() {
         password: password.trim(),
       });
       login(response.data);
-      router.push("/");
+      router.push("/productos");
     } catch (err: any) {
       setError(
         err?.response?.data?.message || "No se pudo iniciar sesión. Verifica tus datos."
@@ -38,10 +38,11 @@ export default function LoginForm() {
     <div className="container mt-5">
       <div className="row justify-content-center">
         <div className="col-md-6">
+          <div className="text-center mb-4"></div>
           <div className="card shadow-sm">
             <div className="card-body">
+              <div className="text-center mb-4"></div>
               <h1 className="card-title mb-4">Iniciar sesión</h1>
-
               <form onSubmit={handleSubmit}>
                 <div className="mb-3">
                   <label htmlFor="correo" className="form-label">

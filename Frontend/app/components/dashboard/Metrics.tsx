@@ -15,7 +15,7 @@ import {
 } from 'chart.js';
 import { Line, Doughnut } from 'react-chartjs-2';
 import styles from './Metrics.module.css';
-import { getSalesByCategory, getRevenueByMonth, getOrdersByMonth } from '@/app/shared/servicios/api';
+import { getSalesByCategory, getRevenueByMonth, getOrdersByMonth } from '../../servicios/api';
 
 ChartJS.register(
     CategoryScale,

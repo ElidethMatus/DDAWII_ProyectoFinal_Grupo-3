@@ -1,5 +1,5 @@
 import Navbar from "../components/navbar/Navbar";
-import { ProductoProvider } from "../productos/providers/ProductoProvider";
+import { ProductoProvider } from "../providers/ProductoProvider";
 
 export default function GeneralLayout({
   children,
@@ -9,7 +9,9 @@ export default function GeneralLayout({
   return (
     <ProductoProvider>
       <Navbar />
-      <main>{children}</main>
+      <main style={{ paddingTop: "80px" }}>
+        {children}
+      </main>
     </ProductoProvider>
   );
 }
