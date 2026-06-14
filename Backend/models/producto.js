@@ -31,6 +31,9 @@ const Producto = sequelize.define(
     categoria: {
       type: DataTypes.STRING,
     },
+    categoria: {
+        type: DataTypes.STRING
+    },
     imagen: {
       type: DataTypes.STRING,
     },
