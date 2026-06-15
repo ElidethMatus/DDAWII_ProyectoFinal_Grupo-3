@@ -1,6 +1,15 @@
 CREATE DATABASE ecommerce;
 USE ecommerce;
 
+INSERT INTO orders (user_id, total)
+VALUES (1, 16000);
+SELECT * FROM orders;
+SELECT * FROM order_details;
+INSERT INTO order_details
+(order_id, product_id, cantidad, precio)
+VALUES
+(1, 1, 1, 15000),
+(1, 3, 2, 500);
 SELECT * FROM products;
 
 CREATE TABLE users (
@@ -10,6 +19,9 @@ CREATE TABLE users (
     password VARCHAR(255) NOT NULL,
     rol ENUM('cliente','vendedor') DEFAULT 'cliente'
 );
+
+ALTER TABLE products
+MODIFY imagen VARCHAR(600);
 
 CREATE TABLE products (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -48,7 +60,7 @@ CREATE TABLE order_details (
     FOREIGN KEY (product_id) REFERENCES products(id)
 );
 
--- Grafico para chart.js
+-- Graficos para chart.js
 SELECT
     p.categoria,
     SUM(od.cantidad) AS total_vendido

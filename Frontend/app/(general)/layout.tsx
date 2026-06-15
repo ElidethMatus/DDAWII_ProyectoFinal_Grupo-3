@@ -1,5 +1,5 @@
-import Navbar from "../shared/components/navbar/Navbar";
-import { ProductoProvider } from "@/app/productos/providers/ProductoProvider";
+import Navbar from "../components/navbar/Navbar";
+import { ProductoProvider } from "../providers/ProductoProvider";
 
 export default function GeneralLayout({
   children,
@@ -7,13 +7,11 @@ export default function GeneralLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="es">
-      <body>
-        <ProductoProvider>
-          <Navbar />
-          <main>{children}</main>
-        </ProductoProvider>
-      </body>
-    </html>
+    <ProductoProvider>
+      <Navbar />
+      <main style={{ paddingTop: "80px" }}>
+        {children}
+      </main>
+    </ProductoProvider>
   );
 }
