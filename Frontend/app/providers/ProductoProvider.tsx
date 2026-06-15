@@ -20,6 +20,10 @@ export const ProductoProvider: React.FC<{ children: React.ReactNode }> = ({
   const [showCarritoModal, setShowCarritoModal] = useState(false);
 
   useEffect(() => {
+  console.log("CARRITO:", carrito);
+}, [carrito]);
+
+  useEffect(() => {
     getProductos().then(setProductos);
   }, []);
 

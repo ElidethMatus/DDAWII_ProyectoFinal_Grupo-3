@@ -27,7 +27,8 @@ export default function LoginForm() {
       router.push("/productos");
     } catch (err: any) {
       setError(
-        err?.response?.data?.message || "No se pudo iniciar sesión. Verifica tus datos."
+        err?.response?.data?.message ||
+          "No se pudo iniciar sesión. Verifica tus datos.",
       );
     } finally {
       setLoading(false);

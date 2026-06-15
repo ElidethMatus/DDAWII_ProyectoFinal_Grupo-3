@@ -1,319 +1,301 @@
-const express = require('express');
-const cors = require('cors');
+const express = require("express");
+const cors = require("cors");
 
-const sequelize = require('./connection/db');
-const Producto = require('./models/producto');
-const Usuario = require('./models/usuario');
-const Order = require('./models/ordenes');
-const OrderDetail = require('./models/ordDetalles');
+const sequelize = require("./connection/db");
+const Producto = require("./models/producto");
+const Usuario = require("./models/usuario");
+const Order = require("./models/ordenes");
+const OrderDetail = require("./models/ordDetalles");
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-sequelize.authenticate()
-.then(() => {
-    console.log('Conexión exitosa a MySQL');
-})
-.catch((error) => {
-    console.log('Error:', error);
+sequelize
+  .authenticate()
+  .then(() => {
+    console.log("Conexión exitosa a MySQL");
+  })
+  .catch((error) => {
+    console.log("Error:", error);
+  });
+
+app.get("/products", async (req, res) => {
+  try {
+    const productos = await Producto.findAll();
+    res.status(200).json(productos);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
-app.get('/products', async (req, res) => {
-
-    try {
-        const productos = await Producto.findAll();
-        res.status(200).json(productos);
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
-    }
-
-});
-
-app.get('/orders/:userId', async (req, res) => {
-
-    try {
-
-        const orders = await Order.findAll({
-            where: {
-                user_id: req.params.userId
-            },
-            order: [['fecha', 'DESC']]
-        });
-
-        res.status(200).json(orders);
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
-
-    }
-
-});
-
-app.get('/orders/detail/:orderId', async (req, res) => {
-
-    try {
-
-        const detalles = await OrderDetail.findAll({
-            where: {
-                order_id: req.params.orderId
-            }
-        });
-
-        const detallesConNombre = [];
-
-        for (const detalle of detalles) {
-
-            const producto = await Producto.findByPk(
-                detalle.product_id
-            );
-
-            detallesConNombre.push({
-                id: detalle.id,
-                nombre: producto.nombre,
-                cantidad: detalle.cantidad,
-                precio: detalle.precio
-            });
-
-        }
-
-        res.status(200).json(detallesConNombre);
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
-    }
+app.get("/orders/:userId", async (req, res) => {
+  try {
+    const orders = await Order.findAll({
+      where: {
+        user_id: req.params.userId,
+      },
+      order: [["fecha", "DESC"]],
     });
 
-app.get('/users', async (req, res) => {
-
-    try {
-        const usuarios = await Usuario.findAll({
-            attributes: ['id', 'nombre', 'correo', 'rol']
-        });
-        res.status(200).json(usuarios);
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
+    res.status(200).json(orders);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
-app.post('/users', async (req, res) => {
+app.get("/orders/detail/:orderId", async (req, res) => {
+  try {
+    const detalles = await OrderDetail.findAll({
+      where: {
+        order_id: req.params.orderId,
+      },
+    });
 
-    try {
-        const usuario = await Usuario.create({
-            nombre: req.body.nombre?.trim(),
-            correo: req.body.correo?.trim().toLowerCase(),
-            password: req.body.password?.trim(),
-            rol: req.body.rol || 'cliente'
-        });
-        res.status(201).json(usuario);
+    const detallesConNombre = [];
 
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
+    for (const detalle of detalles) {
+      const producto = await Producto.findByPk(detalle.product_id);
+
+      detallesConNombre.push({
+        id: detalle.id,
+        nombre: producto.nombre,
+        cantidad: detalle.cantidad,
+        precio: detalle.precio,
+      });
     }
+
+    res.status(200).json(detallesConNombre);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
-app.post('/login', async (req, res) => {
-
-    try {
-        const correo = req.body.correo?.trim().toLowerCase();
-        const password = req.body.password?.trim();
-
-        const usuario = await Usuario.findOne({
-            where: {
-                correo,
-                password
-            }
-        });
-
-        if(usuario){
-            res.status(200).json({
-                id: usuario.id,
-                nombre: usuario.nombre,
-                correo: usuario.correo,
-                rol: usuario.rol
-            });
-        } else {
-
-            res.status(401).json({
-                message: 'Correo o contraseña incorrectos'
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
-    }
+app.get("/users", async (req, res) => {
+  try {
+    const usuarios = await Usuario.findAll({
+      attributes: ["id", "nombre", "correo", "rol"],
+    });
+    res.status(200).json(usuarios);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
-app.post('/products', async (req, res) => {
-
-    try {
-        const producto = await Producto.create({
-            nombre: req.body.nombre,
-            descripcion: req.body.descripcion,
-            precio: req.body.precio,
-            stock: req.body.stock,
-            imagen: req.body.imagen
-        });
-
-        res.status(201).json(producto);
-    } catch (error) {
-        res.status(500).json({
-            message: error.message
-        });
-
-    }
-
+app.post("/users", async (req, res) => {
+  try {
+    const usuario = await Usuario.create({
+      nombre: req.body.nombre?.trim(),
+      correo: req.body.correo?.trim().toLowerCase(),
+      password: req.body.password?.trim(),
+      rol: req.body.rol || "cliente",
+    });
+    res.status(201).json(usuario);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
-app.post('/orders', async (req, res) => {
+app.post("/login", async (req, res) => {
+  try {
+    const correo = req.body.correo?.trim().toLowerCase();
+    const password = req.body.password?.trim();
 
-    try {
+    const usuario = await Usuario.findOne({
+      where: {
+        correo,
+        password,
+      },
+    });
 
-        const { user_id, productos } = req.body;
-
-        let total = 0;
-
-        for (const item of productos) {
-
-            const producto = await Producto.findByPk(
-                item.product_id
-            );
-
-            if (producto.stock < item.cantidad) {
-
-                return res.status(400).json({
-                    message: `Stock insuficiente para ${producto.nombre}`
-                });
-
-            }
-
-            total += producto.precio * item.cantidad;
-
-        }
-
-        const orden = await Order.create({
-            user_id,
-            total
-        });
-
-        for (const item of productos) {
-
-            const producto = await Producto.findByPk(
-                item.product_id
-            );
-
-            await OrderDetail.create({
-                order_id: orden.id,
-                product_id: item.product_id,
-                cantidad: item.cantidad,
-                precio: producto.precio
-            });
-
-            await Producto.update(
-                {
-                    stock: producto.stock - item.cantidad
-                },
-                {
-                    where: {
-                        id: item.product_id
-                    }
-                }
-            );
-
-        }
-
-        res.status(201).json({
-            message: 'Compra registrada',
-            order_id: orden.id
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
-
+    if (usuario) {
+      res.status(200).json({
+        id: usuario.id,
+        nombre: usuario.nombre,
+        correo: usuario.correo,
+        rol: usuario.rol,
+      });
+    } else {
+      res.status(401).json({
+        message: "Correo o contraseña incorrectos",
+      });
     }
-
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
-app.put('/products/:id', async (req, res) => {
+app.post("/products", async (req, res) => {
+  try {
+    const producto = await Producto.create({
+      nombre: req.body.nombre,
+      descripcion: req.body.descripcion,
+      precio: req.body.precio,
+      stock: req.body.stock,
+      categoria: req.body.categoria,
+      imagen: req.body.imagen,
+    });
 
-    try {
-        await Producto.update(
-            {
-                nombre: req.body.nombre,
-                descripcion: req.body.descripcion,
-                precio: req.body.precio,
-                stock: req.body.stock,
-                categoria: req.body.categoria,
-                imagen: req.body.imagen
-            },
-            {where: { id: req.params.id }
-            }
-        );
+    res.status(201).json(producto);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
 
-        res.status(200).json({
-            message: 'Producto actualizado'
+app.post("/orders", async (req, res) => {
+  try {
+    const { user_id, productos } = req.body;
+
+    let total = 0;
+
+    for (const item of productos) {
+      const producto = await Producto.findByPk(item.product_id);
+
+      if (producto.stock < item.cantidad) {
+        return res.status(400).json({
+          message: `Stock insuficiente para ${producto.nombre}`,
         });
+      }
 
-    } catch (error) {
-
-        res.status(500).json({
-            message: error.message
-        });
-
+      total += producto.precio * item.cantidad;
     }
 
+    const orden = await Order.create({
+      user_id,
+      total,
+    });
+
+    for (const item of productos) {
+      const producto = await Producto.findByPk(item.product_id);
+
+      await OrderDetail.create({
+        order_id: orden.id,
+        product_id: item.product_id,
+        cantidad: item.cantidad,
+        precio: producto.precio,
+      });
+
+      await Producto.update(
+        {
+          stock: producto.stock - item.cantidad,
+        },
+        {
+          where: {
+            id: item.product_id,
+          },
+        },
+      );
+    }
+
+    res.status(201).json({
+      message: "Compra registrada",
+      order_id: orden.id,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+app.put("/products/:id", async (req, res) => {
+  try {
+    await Producto.update(
+      {
+        nombre: req.body.nombre,
+        descripcion: req.body.descripcion,
+        precio: req.body.precio,
+        stock: req.body.stock,
+        categoria: req.body.categoria,
+        imagen: req.body.imagen,
+      },
+      { where: { id: req.params.id } },
+    );
+
+    res.status(200).json({
+      message: "Producto actualizado",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+});
+
+app.delete("/products/:id", async (req, res) => {
+  try {
+    const eliminados = await Producto.destroy({
+      where: {
+        id: req.params.id,
+      },
+    });
+
+    console.log("Filas eliminadas:", eliminados);
+
+    res.status(200).json({
+      message: "Producto eliminado",
+      eliminados,
+    });
+  } catch (error) {
+    console.error("ERROR:", error);
+
+    res.status(500).json({
+      message: error.message,
+    });
+  }
 });
 
 // Endpoint temporal para verificar estructura de tablas
-app.get('/debug/tables', async (req, res) => {
-    try {
-        const [orderDetails] = await sequelize.query("DESCRIBE order_details");
-        const [orders] = await sequelize.query("DESCRIBE orders");
-        const [products] = await sequelize.query("DESCRIBE products");
-        
-        res.status(200).json({
-            order_details: orderDetails,
-            orders: orders,
-            products: products
-        });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+app.get("/debug/tables", async (req, res) => {
+  try {
+    const [orderDetails] = await sequelize.query("DESCRIBE order_details");
+    const [orders] = await sequelize.query("DESCRIBE orders");
+    const [products] = await sequelize.query("DESCRIBE products");
+
+    res.status(200).json({
+      order_details: orderDetails,
+      orders: orders,
+      products: products,
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // Endpoint para insertar datos de prueba
-app.get('/debug/seed-data', async (req, res) => {
-    try {
-        // Primero verificar qué productos existen
-        const [products] = await sequelize.query("SELECT id FROM products LIMIT 10");
-        
-        if (products.length === 0) {
-            return res.status(400).json({ error: 'No hay productos en la base de datos' });
-        }
+app.get("/debug/seed-data", async (req, res) => {
+  try {
+    // Primero verificar qué productos existen
+    const [products] = await sequelize.query(
+      "SELECT id FROM products LIMIT 10",
+    );
 
-        // Usar los IDs de productos existentes
-        const productIds = products.map(p => p.id);
-        
-        // Insertar orders de prueba
-        await sequelize.query(`
+    if (products.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "No hay productos en la base de datos" });
+    }
+
+    // Usar los IDs de productos existentes
+    const productIds = products.map((p) => p.id);
+
+    // Insertar orders de prueba
+    await sequelize.query(`
             INSERT INTO orders (user_id, fecha, total) VALUES
             (1, '2024-01-15 10:30:00', 150.00),
             (1, '2024-02-20 14:45:00', 200.50),
@@ -327,13 +309,13 @@ app.get('/debug/seed-data', async (req, res) => {
             (1, '2024-06-01 09:30:00', 280.00)
         `);
 
-        // Insertar order_details de prueba usando IDs de productos reales
-        const p1 = productIds[0] || 1;
-        const p2 = productIds[1] || productIds[0] || 2;
-        const p3 = productIds[2] || productIds[0] || 3;
-        const p4 = productIds[3] || productIds[0] || 4;
+    // Insertar order_details de prueba usando IDs de productos reales
+    const p1 = productIds[0] || 1;
+    const p2 = productIds[1] || productIds[0] || 2;
+    const p3 = productIds[2] || productIds[0] || 3;
+    const p4 = productIds[3] || productIds[0] || 4;
 
-        await sequelize.query(`
+    await sequelize.query(`
             INSERT INTO order_details (order_id, product_id, cantidad, precio) VALUES
             (1, ${p1}, 2, 50.00),
             (1, ${p2}, 1, 50.00),
@@ -357,18 +339,24 @@ app.get('/debug/seed-data', async (req, res) => {
             (10, ${p2}, 2, 65.00)
         `);
 
-        res.status(200).json({ message: 'Datos de prueba insertados correctamente', productIds });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
+    res
+      .status(200)
+      .json({
+        message: "Datos de prueba insertados correctamente",
+        productIds,
+      });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 // ===== ENDPOINTS PARA GRÁFICAS =====
 
 // 1. Productos más vendidos (Top 10)
-app.get('/metrics/top-products', async (req, res) => {
-    try {
-        const result = await sequelize.query(`
+app.get("/metrics/top-products", async (req, res) => {
+  try {
+    const result = await sequelize.query(
+      `
             SELECT 
                 p.nombre,
                 SUM(od.cantidad) AS total_vendido,
@@ -378,31 +366,34 @@ app.get('/metrics/top-products', async (req, res) => {
             GROUP BY p.id, p.nombre
             ORDER BY total_vendido DESC
             LIMIT 10
-        `, { type: sequelize.QueryTypes.SELECT });
+        `,
+      { type: sequelize.QueryTypes.SELECT },
+    );
 
-        if (result.length > 0) {
-            res.status(200).json({
-                message: 'Top 10 productos más vendidos',
-                data: result
-            });
-        } else {
-            res.status(400).json({
-                message: 'No se encontraron datos',
-                data: []
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error al obtener productos más vendidos',
-            error: error.message
-        });
+    if (result.length > 0) {
+      res.status(200).json({
+        message: "Top 10 productos más vendidos",
+        data: result,
+      });
+    } else {
+      res.status(400).json({
+        message: "No se encontraron datos",
+        data: [],
+      });
     }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener productos más vendidos",
+      error: error.message,
+    });
+  }
 });
 
 // 2. Ventas por categoría
-app.get('/metrics/sales-by-category', async (req, res) => {
-    try {
-        const result = await sequelize.query(`
+app.get("/metrics/sales-by-category", async (req, res) => {
+  try {
+    const result = await sequelize.query(
+      `
             SELECT 
                 p.categoria,
                 SUM(od.cantidad) AS total_vendido,
@@ -412,96 +403,98 @@ app.get('/metrics/sales-by-category', async (req, res) => {
             INNER JOIN order_details od ON od.product_id = p.id
             GROUP BY p.categoria
             ORDER BY ingresos DESC
-        `, { type: sequelize.QueryTypes.SELECT });
+        `,
+      { type: sequelize.QueryTypes.SELECT },
+    );
 
-        if (result.length > 0) {
-            res.status(200).json({
-                message: 'Ventas por categoría',
-                data: result
-            });
-        } else {
-            res.status(400).json({
-                message: 'No se encontraron datos',
-                data: []
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error al obtener ventas por categoría',
-            error: error.message
-        });
+    if (result.length > 0) {
+      res.status(200).json({
+        message: "Ventas por categoría",
+        data: result,
+      });
+    } else {
+      res.status(400).json({
+        message: "No se encontraron datos",
+        data: [],
+      });
     }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener ventas por categoría",
+      error: error.message,
+    });
+  }
 });
 
 // 3. Ingresos por mes
-app.get('/metrics/revenue-by-month', async (req, res) => {
-    try {
-        const result = await Order.findAll({
-            attributes: [
-                [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m'), 'mes'],
-                [sequelize.fn('SUM', sequelize.col('total')), 'ingresos'],
-                [sequelize.fn('COUNT', sequelize.col('id')), 'num_ordenes']
-            ],
-            group: [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m')],
-            order: [[sequelize.literal('mes'), 'DESC']],
-            limit: 12,
-            raw: true
-        });
+app.get("/metrics/revenue-by-month", async (req, res) => {
+  try {
+    const result = await Order.findAll({
+      attributes: [
+        [sequelize.fn("DATE_FORMAT", sequelize.col("fecha"), "%Y-%m"), "mes"],
+        [sequelize.fn("SUM", sequelize.col("total")), "ingresos"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "num_ordenes"],
+      ],
+      group: [sequelize.fn("DATE_FORMAT", sequelize.col("fecha"), "%Y-%m")],
+      order: [[sequelize.literal("mes"), "DESC"]],
+      limit: 12,
+      raw: true,
+    });
 
-        if (result.length > 0) {
-            res.status(200).json({
-                message: 'Ingresos por mes',
-                data: result
-            });
-        } else {
-            res.status(400).json({
-                message: 'No se encontraron datos',
-                data: []
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error al obtener ingresos por mes',
-            error: error.message
-        });
+    if (result.length > 0) {
+      res.status(200).json({
+        message: "Ingresos por mes",
+        data: result,
+      });
+    } else {
+      res.status(400).json({
+        message: "No se encontraron datos",
+        data: [],
+      });
     }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener ingresos por mes",
+      error: error.message,
+    });
+  }
 });
 
 // 4. Órdenes por mes
-app.get('/metrics/orders-by-month', async (req, res) => {
-    try {
-        const result = await Order.findAll({
-            attributes: [
-                [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m'), 'mes'],
-                [sequelize.fn('COUNT', sequelize.col('id')), 'total_ordenes'],
-                [sequelize.fn('SUM', sequelize.col('total')), 'ingresos_mes'],
-                [sequelize.fn('AVG', sequelize.col('total')), 'promedio_orden']
-            ],
-            group: [sequelize.fn('DATE_FORMAT', sequelize.col('fecha'), '%Y-%m')],
-            order: [[sequelize.literal('mes'), 'DESC']],
-            limit: 12,
-            raw: true
-        });
+app.get("/metrics/orders-by-month", async (req, res) => {
+  try {
+    const result = await Order.findAll({
+      attributes: [
+        [sequelize.fn("DATE_FORMAT", sequelize.col("fecha"), "%Y-%m"), "mes"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "total_ordenes"],
+        [sequelize.fn("SUM", sequelize.col("total")), "ingresos_mes"],
+        [sequelize.fn("AVG", sequelize.col("total")), "promedio_orden"],
+      ],
+      group: [sequelize.fn("DATE_FORMAT", sequelize.col("fecha"), "%Y-%m")],
+      order: [[sequelize.literal("mes"), "DESC"]],
+      limit: 12,
+      raw: true,
+    });
 
-        if (result.length > 0) {
-            res.status(200).json({
-                message: 'Órdenes por mes',
-                data: result
-            });
-        } else {
-            res.status(400).json({
-                message: 'No se encontraron datos',
-                data: []
-            });
-        }
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error al obtener órdenes por mes',
-            error: error.message
-        });
+    if (result.length > 0) {
+      res.status(200).json({
+        message: "Órdenes por mes",
+        data: result,
+      });
+    } else {
+      res.status(400).json({
+        message: "No se encontraron datos",
+        data: [],
+      });
     }
+  } catch (error) {
+    res.status(500).json({
+      message: "Error al obtener órdenes por mes",
+      error: error.message,
+    });
+  }
 });
 
 app.listen(5000, () => {
-    console.log('Servidor corriendo en puerto 5000');
+  console.log("Servidor corriendo en puerto 5000");
 });

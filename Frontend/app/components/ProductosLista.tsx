@@ -2,6 +2,7 @@
 import React, { useContext, useEffect } from "react";
 import { ProductoContext } from "../context/ProductoContext";
 import Swal from "sweetalert2";
+import { useAuth } from "../context/AuthContext";
 
 export default function ProductosLista() {
   const {
@@ -11,6 +12,8 @@ export default function ProductosLista() {
     abrirModal,
     eliminarProducto,
   } = useContext(ProductoContext);
+
+  const { user } = useAuth();
 
   useEffect(() => {
     console.log("Productos cargados:", productos);
@@ -68,29 +71,38 @@ export default function ProductosLista() {
                   <strong>Stock:</strong> {producto.stock}
                 </p>
                 <p className="fw-bold fs-5">L. {producto.precio}</p>
-                <button
-                  className="btn btn-primary mt-auto"
-                  onClick={() => agregarAlCarrito(producto)}
-                >
-                  Agregar al carrito
-                </button>
-                <button
-                  className="btn btn-warning mt-2"
-                  onClick={() => {
-                    setProductoSeleccionado(producto);
-                    abrirModal();
-                  }}
-                >
-                  Editar
-                </button>
-                <button
-                  className="btn btn-danger mt-2"
-                  onClick={() => {
-                    confirmarEliminar(producto.id, producto.nombre);
-                  }}
-                >
-                  Eliminar
-                </button>
+
+                {user?.rol !== "vendedor" && (
+                  <button
+                    className="btn btn-primary mt-auto"
+                    onClick={() => agregarAlCarrito(producto)}
+                  >
+                    Agregar al carrito
+                  </button>
+                )}
+
+                {user?.rol === "vendedor" && (
+                  <>
+                    <button
+                      className="btn btn-warning mt-2"
+                      onClick={() => {
+                        setProductoSeleccionado(producto);
+                        abrirModal();
+                      }}
+                    >
+                      Editar
+                    </button>
+
+                    <button
+                      className="btn btn-danger mt-2"
+                      onClick={() => {
+                        confirmarEliminar(producto.id, producto.nombre);
+                      }}
+                    >
+                      Eliminar
+                    </button>
+                  </>
+                )}
               </div>
             </div>
           </div>

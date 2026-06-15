@@ -20,7 +20,14 @@ export default function Navbar() {
     <nav className="navbar navbar-expand-lg bg-body-tertiary fixed-top shadow-sm">
       <div className="container-fluid">
         <Link href="/" className="navbar-brand d-flex align-items-center">
-        <Image src="/ProyectoDWII.png" alt="Pulpería Online" width={250} height={80} priority style={{width: "auto", height: "60px",}}/>
+          <Image
+            src="/ProyectoDWII.png"
+            alt="Pulpería Online"
+            width={250}
+            height={80}
+            priority
+            style={{ width: "auto", height: "60px" }}
+          />
         </Link>
         <button
           className="navbar-toggler"
@@ -40,7 +47,7 @@ export default function Navbar() {
               Productos
             </Link>
 
-            {user && (
+            {user?.rol !== "vendedor" && (
               <Link href="/historial" className="nav-link">
                 Historial
               </Link>
@@ -62,20 +69,20 @@ export default function Navbar() {
           <div className="ms-auto d-flex align-items-center gap-2">
             {user && (
               <>
-                <button
-                  className="btn btn-outline-primary position-relative"
-                  onClick={abrirCarritoModal}
-                >
-                  <i className="bi bi-cart4"></i>
+                {user?.rol !== "vendedor" && (
+                  <button
+                    className="btn btn-outline-primary position-relative"
+                    onClick={abrirCarritoModal}
+                  >
+                    <i className="bi bi-cart4"></i>
 
-                  <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
-                    {carrito.length}
-                  </span>
-                </button>
+                    <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                      {carrito.length}
+                    </span>
+                  </button>
+                )}
 
-                <span className="navbar-text">
-                  Hola, {user.nombre}
-                </span>
+                <span className="navbar-text">Hola, {user.nombre}</span>
 
                 <button
                   type="button"
@@ -86,7 +93,6 @@ export default function Navbar() {
                 </button>
               </>
             )}
-
             {!user && (
               <>
                 <Link href="/iniciar-sesion" className="nav-link">

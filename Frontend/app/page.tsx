@@ -17,7 +17,8 @@ export default function Home() {
           <div className="p-4 rounded shadow-sm bg-light">
             <h1>Bienvenido a la tienda</h1>
             <p>
-              Inicia sesión o regístrate para ver más productos y acceder a tu cuenta.
+              Inicia sesión o regístrate para ver más productos y acceder a tu
+              cuenta.
             </p>
             <div>
               <a href="/iniciar-sesion" className="btn btn-primary me-2">

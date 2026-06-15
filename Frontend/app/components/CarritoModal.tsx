@@ -1,6 +1,9 @@
 "use client";
 import { useContext } from "react";
 import { ProductoContext } from "../context/ProductoContext";
+import { useAuth } from "../context/AuthContext";
+import { createOrder } from "../servicios/api";
+import Swal from "sweetalert2";
 
 export default function CarritoModal() {
   const {
@@ -10,6 +13,7 @@ export default function CarritoModal() {
     quitarDelCarrito,
     limpiarCarrito,
   } = useContext(ProductoContext);
+    const { user } = useAuth();
 
   if (!showCarritoModal) return null;
 
@@ -18,8 +22,51 @@ export default function CarritoModal() {
     0,
   );
 
+
+
+const confirmarPedido = async () => {
+  console.log("USER:", user);
+  console.log("CARRITO:", carrito);
+
+  try {
+    if (!user) {
+      Swal.fire("Error", "Debes iniciar sesión", "error");
+      return;
+    }
+
+    const productos = carrito.map((producto) => ({
+      product_id: producto.id,
+      cantidad: 1,
+    }));
+
+    await createOrder({
+      user_id: user.id,
+      productos,
+    });
+
+    Swal.fire(
+      "Éxito",
+      "Pedido realizado correctamente",
+      "success"
+    );
+
+    limpiarCarrito();
+
+    window.location.reload();
+
+  } catch (error) {
+    console.error(error);
+
+    Swal.fire(
+      "Error",
+      "No se pudo registrar el pedido",
+      "error"
+    );
+  }
+};
+
   return (
-    <div className="modal show d-block" tabIndex={-1}>
+    <div className="modal show d-block" tabIndex={-1} style={{backgroundColor: "rgba(0, 0, 0, 0.75)",}}>
       <div className="modal-dialog modal-lg">
         <div className="modal-content">
           <div className="modal-header">
@@ -61,7 +108,7 @@ export default function CarritoModal() {
             <button className="btn btn-danger" onClick={limpiarCarrito}>
               Vaciar carrito
             </button>
-            <button className="btn btn-success">Confirmar pedido</button>
+            <button className="btn btn-success" onClick={confirmarPedido}> Confirmar pedido </button>
           </div>
         </div>
       </div>

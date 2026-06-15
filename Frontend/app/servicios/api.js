@@ -39,3 +39,7 @@ export const getRevenueByMonth = async () => {
 export const getOrdersByMonth = async () => {
     return await axios.get('http://localhost:5000/metrics/orders-by-month');
 };
+
+export const createOrder = async (order) => {
+    return await axios.post('http://localhost:5000/orders',order);
+};
